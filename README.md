@@ -1,4 +1,4 @@
-**MG-MAPF BASELINE**
+**MG_BASELINE**
 
 </div> 
 
