@@ -26,7 +26,7 @@ cd docker && sh build.sh
 To execute the **Follower** algorithm and produce an animation using pre-trained weights, use the following command:
 
 ```bash
-python mg_test.py --map_name maze-32-32-4 --num_agents 10 --num_goals 10
+python mgmapf_infer.py --map_name maze-32-32-4 --num_agents 10 --num_goals 10
 ```
 
 The animation will be stored in the `renders` folder.The results will be stored in the `results` folder.
