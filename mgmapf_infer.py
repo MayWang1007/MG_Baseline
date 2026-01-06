@@ -10,41 +10,9 @@ from mg_map import get_map_info, visualize_map_info, visualize_all_agents_paths
 import gymnasium as gym
 from mg_env import  run_mgmapf_python
 
-FIXED_GOAL_NUM = 20
-PROGRESS_INTERVAL = 50
-
-def process_actions(actions: Any, agent_count: int) -> List[int]:
-    """处理算法输出的动作"""
-    processed = []
-    for act in actions:
-        if isinstance(act, torch.Tensor):
-            act = act.detach().cpu().numpy()
-            act = act.flatten()[0] if act.numel() > 0 else 0
-        
-        if isinstance(act, np.ndarray):
-            act_flat = act.flatten()
-            act = act_flat[0] if len(act_flat) > 0 else 0
-        
-        if isinstance(act, (np.integer, np.floating)):
-            act = int(act.item()) if hasattr(act, 'item') else int(act)
-        
-        processed.append(int(act) if not isinstance(act, int) else act)
-    
-    if len(processed) < agent_count:
-        processed += [0] * (agent_count - len(processed))
-    elif len(processed) > agent_count:
-        processed = processed[:agent_count]
-    
-    return processed
-
 def convert_xy_to_rowcol(pos_xy: tuple) -> tuple:
-    """
-    将 (x, y) 坐标转换为 (row, col) 坐标
-    get_map_info 返回 (x=列, y=行)
-    pogema 使用 (row, col)
-    """
     x, y = pos_xy
-    return (y, x)  # (行, 列)
+    return (y, x)  
 
 def load_map_from_yaml(yaml_file, map_name):
     with open(yaml_file, 'r') as f:
@@ -124,12 +92,10 @@ def generate_task_instance_list(
                 agent_task_goals = [convert_xy_to_rowcol(g) for g in selected_goals_xy]
         
         task_instances_rc.append(agent_task_goals)
-        
-        print(f"Agent {idx}: Start (x,y)={agent_start_xy} -> (row,col)={start_rc}, "
-              f"Goals={len(agent_task_goals)}")
 
-    print(f"\n成功生成 {len(task_instances_rc)} 个任务实例")
+    print(f"\nGenerated {len(task_instances_rc)}  task instances")
     return task_instances_rc, start_positions_rc
+
 
 def main(args):
     valid_positions, valid_starts, obstacles, boundaries = get_map_info(
@@ -147,7 +113,8 @@ def main(args):
         max_steps=args.max_episode_steps,
         obs_radius=5,
         save_animation=args.save_animation, 
-        animation_path=f'renders/{args.map_name}_animation.svg'  
+        avoid_blocking=True,
+        animation_path=f'renders/{args.map_name}_{args.num_agents}_{args.num_goals}.svg',
     )
     
     if results.get('success'):
